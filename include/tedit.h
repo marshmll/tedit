@@ -5,16 +5,25 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ALLOC_CHUNK_SIZE 1024
+#define ALLOC_CHUNK_SIZE 512
 
 typedef struct
 {
-    int height;
-    int width;
+    int scr_height;
+    int scr_width;
     int cursor_x;
     int cursor_y;
-} WinData;
+    char *filestr;
+} EditorData;
 
-WinData init_window();
+EditorData init_editor();
 
 char *read_file(const char *filename);
+
+void run_editor(EditorData *wd);
+
+void move_cursor(const int y, const int x, EditorData *wd);
+
+void advance_cursor(EditorData *wd);
+
+void back_cursor(EditorData *wd);

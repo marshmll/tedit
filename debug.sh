@@ -10,6 +10,6 @@ fi
 
 cmake --build Debug/ &&
 cd Debug/bin &&
-./tedit &&
+./tedit CMakeLists.txt &&
 cd ../../ &&
 cp Debug/compile_commands.json .

@@ -9,13 +9,22 @@ int main(int argc, char **argv)
     char filename[strlen(argv[1])];
     strcpy(filename, argv[1]);
 
-    char *filestr = read_file(filename);
+    EditorData data = init_editor();
 
-    if (filestr == NULL)
+    data.filestr = read_file(filename);
+
+    if (data.filestr == NULL)
+    {
+        endwin();
         error(EXIT_FAILURE, 0, "Could not read file: %s", filename);
+    }
 
-    printf("%s", filestr);
+    printf("%s", data.filestr);
 
-    free(filestr);
+    run_editor(&data);
+
+    free(data.filestr);
+    endwin();
+
     return 0;
 }
