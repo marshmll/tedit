@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/renan/Desktop/tedit/Debug",
+  "command": "/usr/bin/cc  -I/home/renan/Desktop/tedit/include -g -o CMakeFiles/tedit.dir/src/main.c.o -c /home/renan/Desktop/tedit/src/main.c",
+  "file": "/home/renan/Desktop/tedit/src/main.c",
+  "output": "CMakeFiles/tedit.dir/src/main.c.o"
+},
+{
+  "directory": "/home/renan/Desktop/tedit/Debug",
+  "command": "/usr/bin/cc  -I/home/renan/Desktop/tedit/include -g -o CMakeFiles/tedit.dir/src/tedit.c.o -c /home/renan/Desktop/tedit/src/tedit.c",
+  "file": "/home/renan/Desktop/tedit/src/tedit.c",
+  "output": "CMakeFiles/tedit.dir/src/tedit.c.o"
+}
+]
