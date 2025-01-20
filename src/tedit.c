@@ -81,35 +81,42 @@ void move_cursor(const int y, const int x, EditorData *wd)
 
 void skip_cursor_to_next_line(EditorData *wd)
 {
+    if (wd->crsr_y == wd->scr_height)
+        return;
+
     int target_x = wd->crsr_x;
     int target_y = wd->crsr_y + 1;
+    bool advancing = advance_cursor(wd);
 
-    while (true)
+    while (advancing)
     {
-        advance_cursor(wd);
-
-        if (curr_char(wd) == '\n' && wd->crsr_x < target_x && wd->crsr_y == target_y)
+        if (target_y == wd->crsr_y && curr_char(wd) == '\n' && wd->crsr_x < target_x)
             break;
         else if (wd->crsr_x == target_x)
             break;
+
+        advancing = advance_cursor(wd);
     }
 }
 
 void skip_cursor_to_prev_line(EditorData *wd)
 {
+    if (wd->crsr_y == 0)
+        return;
+
     int target_x = wd->crsr_x;
     int target_y = wd->crsr_y - 1;
-    back_cursor(wd);
+    bool backing = back_cursor(wd);
 
-    while (true)
+    while (backing)
     {
-        back_cursor(wd);
-
         if (target_y == wd->crsr_y && curr_char(wd) == '\n' && wd->crsr_x < target_x)
             break;
 
         else if (wd->crsr_x == target_x)
             break;
+
+        backing = back_cursor(wd);
     }
 }
 
@@ -120,6 +127,7 @@ bool advance_cursor(EditorData *wd)
 
     if (c == EOF)
     {
+        wd->char_i--;
         return false;
     }
     else if (c == '\n')
@@ -130,7 +138,7 @@ bool advance_cursor(EditorData *wd)
     else
     {
         move_cursor(wd->crsr_y, wd->crsr_x + 1, wd);
-        return false;
+        return true;
     }
 }
 
@@ -141,13 +149,14 @@ bool back_cursor(EditorData *wd)
 
     if (c == EOF)
     {
+        wd->char_i++;
         return false;
     }
     else if (c == '\n')
     {
         move_cursor(wd->crsr_y - 1, wd->scr_width - 1, wd);
 
-        while ((inch() & A_CHARTEXT) == ' ' && wd->crsr_x > 0)
+        while ((inch() & A_CHARTEXT) == ' ' && wd->crsr_x != 0)
             move_cursor(wd->crsr_y, wd->crsr_x - 1, wd);
 
         return true;
@@ -155,7 +164,7 @@ bool back_cursor(EditorData *wd)
     else
     {
         move_cursor(wd->crsr_y, wd->crsr_x - 1, wd);
-        return false;
+        return true;
     }
 }
 
