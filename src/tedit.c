@@ -7,11 +7,11 @@ EditorData init_editor()
     keypad(stdscr, true);
     noecho();
 
-    EditorData wd = (EditorData){0, 0, 0, 0, 0, 0};
-    getmaxyx(stdscr, wd.scr_height, wd.scr_width);
+    EditorData ed = (EditorData){0, 0, 0, 0, 0, -1, NULL};
+    getmaxyx(stdscr, ed.scr_height, ed.scr_width);
     move(0, 0);
 
-    return wd;
+    return ed;
 }
 
 char *read_file(const char *filename)
@@ -41,12 +41,12 @@ char *read_file(const char *filename)
     return str;
 }
 
-void run_editor(EditorData *wd)
+void run_editor(EditorData *ed)
 {
     bool running = true;
     char ch;
 
-    printw("%s", wd->filestr);
+    printw("%s", ed->filestr);
     move(0, 0);
 
     while (running)
@@ -54,16 +54,16 @@ void run_editor(EditorData *wd)
         ch = getch();
 
         if (ch == (char)KEY_UP)
-            skip_cursor_to_prev_line(wd);
+            skip_cursor_to_prev_line(ed);
 
         else if (ch == (char)KEY_DOWN)
-            skip_cursor_to_next_line(wd);
+            skip_cursor_to_next_line(ed);
 
         else if (ch == (char)KEY_LEFT)
-            back_cursor(wd);
+            back_cursor(ed);
 
         else if (ch == (char)KEY_RIGHT)
-            advance_cursor(wd);
+            advance_cursor(ed);
 
         else if (ch == 'q')
             running = false;
@@ -72,106 +72,117 @@ void run_editor(EditorData *wd)
     }
 }
 
-void move_cursor(const int y, const int x, EditorData *wd)
+void move_cursor(const int y, const int x, EditorData *ed)
 {
     move(y, x);
-    wd->crsr_x = x;
-    wd->crsr_y = y;
+    ed->crsr_x = x;
+    ed->crsr_y = y;
 }
 
-void skip_cursor_to_next_line(EditorData *wd)
+void skip_cursor_to_next_line(EditorData *ed)
 {
-    if (wd->crsr_y == wd->scr_height)
+    if (ed->crsr_y == ed->scr_height)
         return;
 
-    int target_x = wd->crsr_x;
-    int target_y = wd->crsr_y + 1;
-    bool advancing = advance_cursor(wd);
+    int target_x = ed->trgt_x != (-1) ? ed->trgt_x : ed->crsr_x;
+    int target_y = ed->crsr_y + 1;
+    bool advancing = advance_cursor(ed);
 
     while (advancing)
     {
-        if (target_y == wd->crsr_y && curr_char(wd) == '\n' && wd->crsr_x < target_x)
+        if (target_y == ed->crsr_y && curr_char(ed) == '\n' && ed->crsr_x < target_x)
+        {
+            ed->trgt_x = target_x;
             break;
-        else if (wd->crsr_x == target_x)
+        }
+        else if (ed->crsr_x == target_x)
+        {
+            ed->trgt_x = -1;
             break;
+        }
 
-        advancing = advance_cursor(wd);
+        advancing = advance_cursor(ed);
     }
 }
 
-void skip_cursor_to_prev_line(EditorData *wd)
+void skip_cursor_to_prev_line(EditorData *ed)
 {
-    if (wd->crsr_y == 0)
+    if (ed->crsr_y == 0)
         return;
 
-    int target_x = wd->crsr_x;
-    int target_y = wd->crsr_y - 1;
-    bool backing = back_cursor(wd);
+    int target_x = ed->trgt_x != (-1) ? ed->trgt_x : ed->crsr_x;
+    int target_y = ed->crsr_y - 1;
+    bool backing = back_cursor(ed);
 
     while (backing)
     {
-        if (target_y == wd->crsr_y && curr_char(wd) == '\n' && wd->crsr_x < target_x)
+        if (target_y == ed->crsr_y && curr_char(ed) == '\n' && ed->crsr_x < target_x)
+        {
+            ed->trgt_x = target_x;
             break;
-
-        else if (wd->crsr_x == target_x)
+        }
+        else if (ed->crsr_x == target_x)
+        {
+            ed->trgt_x = -1;
             break;
+        }
 
-        backing = back_cursor(wd);
+        backing = back_cursor(ed);
     }
 }
 
-bool advance_cursor(EditorData *wd)
+bool advance_cursor(EditorData *ed)
 {
-    char c = curr_char(wd);
-    wd->char_i++;
+    char c = curr_char(ed);
+    ed->char_i++;
 
     if (c == EOF)
     {
-        wd->char_i--;
+        ed->char_i--;
         return false;
     }
     else if (c == '\n')
     {
-        move_cursor(wd->crsr_y + 1, 0, wd);
+        move_cursor(ed->crsr_y + 1, 0, ed);
         return true;
     }
     else
     {
-        move_cursor(wd->crsr_y, wd->crsr_x + 1, wd);
+        move_cursor(ed->crsr_y, ed->crsr_x + 1, ed);
         return true;
     }
 }
 
-bool back_cursor(EditorData *wd)
+bool back_cursor(EditorData *ed)
 {
-    wd->char_i--;
-    char c = curr_char(wd);
+    ed->char_i--;
+    char c = curr_char(ed);
 
     if (c == EOF)
     {
-        wd->char_i++;
+        ed->char_i++;
         return false;
     }
     else if (c == '\n')
     {
-        move_cursor(wd->crsr_y - 1, wd->scr_width - 1, wd);
+        move_cursor(ed->crsr_y - 1, ed->scr_width - 1, ed);
 
-        while ((inch() & A_CHARTEXT) == ' ' && wd->crsr_x != 0)
-            move_cursor(wd->crsr_y, wd->crsr_x - 1, wd);
+        while ((inch() & A_CHARTEXT) == ' ' && ed->crsr_x != 0)
+            move_cursor(ed->crsr_y, ed->crsr_x - 1, ed);
 
         return true;
     }
     else
     {
-        move_cursor(wd->crsr_y, wd->crsr_x - 1, wd);
+        move_cursor(ed->crsr_y, ed->crsr_x - 1, ed);
         return true;
     }
 }
 
-char curr_char(EditorData *wd)
+char curr_char(EditorData *ed)
 {
-    if (wd->char_i >= strlen(wd->filestr) || wd->char_i < 0)
+    if (ed->char_i >= strlen(ed->filestr) || ed->char_i < 0)
         return EOF;
 
-    return wd->filestr[wd->char_i];
+    return ed->filestr[ed->char_i];
 }

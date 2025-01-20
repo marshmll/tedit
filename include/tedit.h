@@ -14,6 +14,7 @@ typedef struct
     int crsr_x;
     int crsr_y;
     int char_i;
+    int trgt_x;
     char *filestr;
 } EditorData;
 
@@ -21,16 +22,16 @@ EditorData init_editor();
 
 char *read_file(const char *filename);
 
-void run_editor(EditorData *wd);
+void run_editor(EditorData *ed);
 
-void move_cursor(const int y, const int x, EditorData *wd);
+void move_cursor(const int y, const int x, EditorData *ed);
 
-void skip_cursor_to_next_line(EditorData *wd);
+void skip_cursor_to_next_line(EditorData *ed);
 
-void skip_cursor_to_prev_line(EditorData *wd);
+void skip_cursor_to_prev_line(EditorData *ed);
 
-bool advance_cursor(EditorData *wd);
+bool advance_cursor(EditorData *ed);
 
-bool back_cursor(EditorData *wd);
+bool back_cursor(EditorData *ed);
 
-char curr_char(EditorData *wd);
+char curr_char(EditorData *ed);
